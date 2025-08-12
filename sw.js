@@ -1,4 +1,4 @@
-const CACHE = "convprix-v3";
+const CACHE = "convprix-v4";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./sw.js", "./logo-192.png", "./logo-512.png", "./logo.png"];
 
 self.addEventListener("install", (e) => {
