@@ -1,12 +1,5 @@
-const CACHE = "convprix-v1";
-const ASSETS = [
-  "./",
-  "./index.html",
-  "./manifest.webmanifest",
-  "./sw.js",
-  "./icon-192.png",
-  "./icon-512.png"
-];
+const CACHE = "convprix-v3";
+const ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./sw.js", "./logo-192.png", "./logo-512.png", "./logo.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
