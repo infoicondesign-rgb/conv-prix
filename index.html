@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>Conversion & Prix</title>
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="manifest.webmanifest?v=v8">
 <meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="apple-touch-icon" href="logo-192.png">
+<link rel="apple-touch-icon" href="logo-192.png?v=v8">
 <style>
   :root{--bg:#f8fafc; --card:#ffffff; --muted:#475569; --text:#0f172a; --border:#e2e8f0; --acc:#2563eb;}
   *{box-sizing:border-box}
@@ -35,6 +35,7 @@
   .big{font-size:22px;font-weight:800}
   .sticky{position:sticky;bottom:0;background:linear-gradient(0deg,rgba(255,255,255,.98),rgba(255,255,255,.94));border-top:1px solid var(--border);
           padding:12px 12px calc(12px + env(safe-area-inset-bottom)); box-shadow: 0 -8px 20px rgba(15,23,42,.06);}
+  .version{font-size:12px;color:#64748b;text-align:center;margin-top:6px}
 </style>
 </head>
 <body>
@@ -46,8 +47,10 @@
     </div>
     <div class="toolbar">
       <button class="btn" id="btnReset">Réinitialiser</button>
+      <button class="btn" id="btnUpdate">Forcer mise à jour</button>
       <button class="btn" id="btnShare">Partager / Imprimer</button>
     </div>
+    <div class="version">Version v8</div>
   </div>
 </header>
 
@@ -100,10 +103,21 @@
 <script>
 (function(){
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function(){ navigator.serviceWorker.register('./sw.js'); });
+    navigator.serviceWorker.register('./sw.js?v=v8').then((reg) => {
+      reg.update();
+      reg.addEventListener('updatefound', () => {
+        const swNew = reg.installing;
+        swNew && swNew.addEventListener('statechange', () => {
+          if (swNew.state === 'installed' && navigator.serviceWorker.controller) {
+            location.reload();
+          }
+        });
+      });
+    });
+    navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
   }
 
-  const RESET_MINUTES = 15; // durée d'inactivité avant reset
+  const RESET_MINUTES = 15;
   let lastActive = Date.now();
 
   const data = {"rows": [{"type": "Pare-pierre 30''", "mode": "area", "largeur_default": 30.0, "taux": 11.0, "taux_cost": 5.25}, {"type": "Pare-pierre 60''", "mode": "area", "largeur_default": 60.0, "taux": 15.0, "taux_cost": 5.06}, {"type": "Murale", "mode": "area", "largeur_default": 0.0, "taux": 6.95, "taux_cost": 1.53}, {"type": "Découpe", "mode": "area", "largeur_default": 0.0, "taux": 5.95, "taux_cost": 0.54}, {"type": "WRAP 3M", "mode": "area", "largeur_default": 0.0, "taux": 40.0, "taux_cost": 13.33}, {"type": "WRAP HEXIS", "mode": "area", "largeur_default": 0.0, "taux": 40.0, "taux_cost": 13.33}, {"type": "WRAP Carbon", "mode": "area", "largeur_default": 0.0, "taux": 80.0, "taux_cost": 30.0}, {"type": "STD / LAM STD", "mode": "area", "largeur_default": 0.0, "taux": 7.65, "taux_cost": 1.0}, {"type": "STD / LAM WRAP", "mode": "area", "largeur_default": 0.0, "taux": 8.5, "taux_cost": 1.51}, {"type": "WRAP / LAM", "mode": "area", "largeur_default": 0.0, "taux": 11.0, "taux_cost": 2.18}, {"type": "PROMO LAM", "mode": "area", "largeur_default": 0.0, "taux": 6.95, "taux_cost": 0.75}, {"type": "PROMO / NONLAM", "mode": "area", "largeur_default": 0.0, "taux": 5.0, "taux_cost": 0.9}, {"type": "Reflec", "mode": "area", "largeur_default": 0.0, "taux": 9.95, "taux_cost": 2.62}, {"type": "Magnétique", "mode": "area", "largeur_default": 0.0, "taux": 20.0, "taux_cost": 1.5}, {"type": "Givré", "mode": "area", "largeur_default": 0.0, "taux": 6.95, "taux_cost": 1.15}, {"type": "Contre-vision", "mode": "area", "largeur_default": 0.0, "taux": 9.95, "taux_cost": 0.71}, {"type": "Découpe Gris CHK", "mode": "area", "largeur_default": 0.0, "taux": 9.95, "taux_cost": 2.57}, {"type": "Bannière", "mode": "area", "largeur_default": 0.0, "taux": 6.95, "taux_cost": 0.17}, {"type": "Aluco", "mode": "area", "largeur_default": 0.0, "taux": 3.25, "taux_cost": 1.88}, {"type": "Coro", "mode": "area", "largeur_default": 0.0, "taux": 2.0, "taux_cost": 0.45}], "config": {"labor_min_rate_price": 100.0, "labor_min_rate_cost": 40.0, "labor_hr_rate_price": 100.0, "labor_hr_rate_cost": 40.0}};
@@ -206,10 +220,15 @@
   document.getElementById('b28').addEventListener('input', function(){ onActivity(); recalc(); });
   document.getElementById('btnReset').addEventListener('click', function(){ if(confirm('Réinitialiser et effacer les saisies ?')) resetAll(); });
   document.getElementById('btnShare').addEventListener('click', function(){ window.print(); });
+  document.getElementById('btnUpdate').addEventListener('click', async function(){ 
+    if ('caches' in window) { const keys = await caches.keys(); await Promise.all(keys.map(k => caches.delete(k))); }
+    if (navigator.serviceWorker?.controller) { navigator.serviceWorker.controller.postMessage({type:'SKIP_WAITING'}); }
+    location.href = location.pathname + "?force=" + Date.now();
+  });
 
   setInterval(function(){ 
     var ms = Date.now() - lastActive;
-    if (ms > RESET_MINUTES*60*1000) { resetAll(); lastActive = Date.now(); }
+    if (ms > 15*60*1000) { resetAll(); lastActive = Date.now(); }
   }, 30000);
 
   (function init(){ 
