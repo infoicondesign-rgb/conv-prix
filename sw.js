@@ -1,6 +1,6 @@
-const VERSION = "v9";
+const VERSION = "v10";
 const CACHE = "convprix-" + VERSION;
-const ASSETS = ["./", "./index.html?v=v9","./manifest.webmanifest?v=v9","./sw.js?v=v9","./logo-192.png?v=v9","./logo-512.png?v=v9","./logo.png?v=v9","./apple-touch-icon.png?v=v9"];
+const ASSETS = ["./", "./index.html?v=v10","./manifest.webmanifest?v=v10","./sw.js?v=v10","./logo-192.png?v=v10","./logo-512.png?v=v10","./logo.png?v=v10","./apple-touch-icon.png?v=v10"];
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();

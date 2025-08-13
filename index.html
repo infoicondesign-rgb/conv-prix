@@ -2,22 +2,21 @@
 <html lang="fr-CA">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Conversion & Prix</title>
-<link rel="manifest" href="manifest.webmanifest?v=v9">
+<link rel="manifest" href="manifest.webmanifest?v=v10">
 <meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="ConvPrix">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=v9">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=v9">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png?v=v10">
 <style>
-  :root{--bg:#f8fafc; --card:#ffffff; --muted:#475569; --text:#0f172a; --border:#e2e8f0; --acc:#2563eb; --sticky-top: calc(112px + env(safe-area-inset-top));}
+  :root{--bg:#f8fafc; --card:#ffffff; --muted:#475569; --text:#0f172a; --border:#e2e8f0; --acc:#2563eb; --sticky-top: calc(118px + env(safe-area-inset-top));}
   *{box-sizing:border-box}
   html,body{height:100%}
   body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial}
   header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(255,255,255,.98),rgba(255,255,255,.94));border-bottom:1px solid var(--border)}
-  header .wrap{padding-top: calc(20px + env(safe-area-inset-top)); padding-bottom: 10px;}
+  header .wrap{padding-top: calc(22px + env(safe-area-inset-top)); padding-bottom: 12px;}
   .wrap{max-width:1000px;margin:0 auto;padding:12px}
   .brand{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
   .brand img{height:40px;width:auto}
@@ -27,7 +26,7 @@
   table{width:100%;border-collapse:collapse;font-size:15px;background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
   th,td{border-bottom:1px solid var(--border);padding:10px 8px;text-align:left}
   thead th{position:sticky;top:var(--sticky-top);background:var(--card);z-index:9}
-  input[type=number]{width:100%;background:#ffffff;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:16px}
+  input[type=number]{width:100%;background:#ffffff;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px;font-size:16px; -webkit-appearance:none; touch-action: manipulation;}
   input[type=number]:focus{outline:2px solid var(--acc); outline-offset:1px}
   .num{text-align:right;white-space:nowrap}
   .muted{color:var(--muted)}
@@ -53,7 +52,7 @@
       <button class="btn" id="btnUpdate">Forcer mise à jour</button>
       <button class="btn" id="btnShare">Partager / Imprimer</button>
     </div>
-    <div class="version">Version v9</div>
+    <div class="version">Version v10</div>
   </div>
 </header>
 
@@ -106,7 +105,7 @@
 <script>
 (function(){
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js?v=v9').then((reg) => {
+    navigator.serviceWorker.register('./sw.js?v=v10').then((reg) => {
       reg.update();
       reg.addEventListener('updatefound', () => {
         const swNew = reg.installing;
@@ -120,9 +119,20 @@
     navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
   }
 
+  // iOS PWA input focus fix
+  const isIOSStandalone = (window.navigator.standalone === true) || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+  if (isIOSStandalone) {
+    document.body.addEventListener('touchend', function(e) {
+      const el = e.target.closest('input, textarea, select');
+      if (el && !el.readOnly && !el.disabled) {
+        setTimeout(() => { try { el.focus(); el.select && el.select(); } catch(_e){} }, 0);
+      }
+    }, {passive:true});
+  }
+
   const RESET_MINUTES = 15;
   let lastActive = Date.now();
-  const data = {"rows": [{"type": "Pare-pierre 30''", "mode": "area", "largeur_default": 30.0, "taux": 11.0, "taux_cost": 5.25}, {"type": "Pare-pierre 60''", "mode": "area", "largeur_default": 60.0, "taux": 15.0, "taux_cost": 5.06}, {"type": "Murale", "mode": "area", "largeur_default": 0.0, "taux": 6.95, "taux_cost": 1.53}, {"type": "Découpe", "mode": "area", "largeur_default": 0.0, "taux": 5.95, "taux_cost": 0.54}, {"type": "WRAP 3M", "mode": "area", "largeur_default": 0.0, "taux": 40.0, "taux_cost": 13.33}, {"type": "WRAP HEXIS", "mode": "area", "largeur_default": 0.0, "taux": 40.0, "taux_cost": 13.33}, {"type": "WRAP Carbon", "mode": "area", "largeur_default": 0.0, "taux": 80.0, "taux_cost": 30.0}, {"type": "STD / LAM STD", "mode": "area", "largeur_default": 0.0, "taux": 7.65, "taux_cost": 1.0}, {"type": "STD / LAM WRAP", "mode": "area", "largeur_default": 0.0, "taux": 8.5, "taux_cost": 1.51}, {"type": "WRAP / LAM", "mode": "area", "largeur_default": 0.0, "taux": 11.0, "taux_cost": 2.18}, {"type": "PROMO LAM", "mode": "area", "largeur_default": 0.0, "taux": 6.95, "taux_cost": 0.75}, {"type": "PROMO / NONLAM", "mode": "area", "largeur_default": 0.0, "taux": 5.0, "taux_cost": 0.9}, {"type": "Reflec", "mode": "area", "largeur_default": 0.0, "taux": 9.95, "taux_cost": 2.62}, {"type": "Magnétique", "mode": "area", "largeur_default": 0.0, "taux": 20.0, "taux_cost": 1.5}, {"type": "Givré", "mode": "area", "largeur_default": 0.0, "taux": 6.95, "taux_cost": 1.15}, {"type": "Contre-vision", "mode": "area", "largeur_default": 0.0, "taux": 9.95, "taux_cost": 0.71}, {"type": "Découpe Gris CHK", "mode": "area", "largeur_default": 0.0, "taux": 9.95, "taux_cost": 2.57}, {"type": "Bannière", "mode": "area", "largeur_default": 0.0, "taux": 6.95, "taux_cost": 0.17}, {"type": "Aluco", "mode": "area", "largeur_default": 0.0, "taux": 3.25, "taux_cost": 1.88}, {"type": "Coro", "mode": "area", "largeur_default": 0.0, "taux": 2.0, "taux_cost": 0.45}], "config": {"labor_min_rate_price": 100.0, "labor_min_rate_cost": 40.0, "labor_hr_rate_price": 100.0, "labor_hr_rate_cost": 40.0}};
+  const data = {"rows": [{"type": "Murale", "mode": "area", "largeur_default": 54.0, "taux": 6.95, "taux_cost": 1.53}, {"type": "Découpe", "mode": "area", "largeur_default": 54.0, "taux": 5.95, "taux_cost": 0.54}, {"type": "WRAP 3M", "mode": "area", "largeur_default": 54.0, "taux": 40.0, "taux_cost": 13.33}, {"type": "WRAP HEXIS", "mode": "area", "largeur_default": 54.0, "taux": 40.0, "taux_cost": 13.33}, {"type": "WRAP Carbon", "mode": "area", "largeur_default": 54.0, "taux": 80.0, "taux_cost": 30.0}, {"type": "STD / LAM STD", "mode": "area", "largeur_default": 54.0, "taux": 7.65, "taux_cost": 1.0}, {"type": "STD / LAM WRAP", "mode": "area", "largeur_default": 54.0, "taux": 8.5, "taux_cost": 1.51}, {"type": "WRAP / LAM", "mode": "area", "largeur_default": 54.0, "taux": 11.0, "taux_cost": 2.18}, {"type": "PROMO LAM", "mode": "area", "largeur_default": 54.0, "taux": 6.95, "taux_cost": 0.75}, {"type": "PROMO / NONLAM", "mode": "area", "largeur_default": 54.0, "taux": 5.0, "taux_cost": 0.9}, {"type": "Reflec", "mode": "area", "largeur_default": 54.0, "taux": 9.95, "taux_cost": 2.62}, {"type": "Magnétique", "mode": "area", "largeur_default": 54.0, "taux": 20.0, "taux_cost": 1.5}, {"type": "Givré", "mode": "area", "largeur_default": 54.0, "taux": 6.95, "taux_cost": 1.15}, {"type": "Contre-vision", "mode": "area", "largeur_default": 54.0, "taux": 9.95, "taux_cost": 0.71}, {"type": "Découpe Gris CHK", "mode": "area", "largeur_default": 54.0, "taux": 9.95, "taux_cost": 2.57}, {"type": "Bannière", "mode": "area", "largeur_default": 54.0, "taux": 6.95, "taux_cost": 0.17}, {"type": "Aluco", "mode": "area", "largeur_default": 54.0, "taux": 3.25, "taux_cost": 1.88}, {"type": "Coro", "mode": "area", "largeur_default": 54.0, "taux": 2.0, "taux_cost": 0.45}], "config": {"labor_min_rate_price": 100.0, "labor_min_rate_cost": 40.0, "labor_hr_rate_price": 100.0, "labor_hr_rate_cost": 40.0}};
   const fmtCAD = new Intl.NumberFormat('fr-CA', {style:'currency', currency:'CAD'});
   function num(v){ if(v===null||v===undefined||v==='') return 0; v=(''+v).replace(',','.'); var n=parseFloat(v); return isNaN(n)?0:n; }
 
@@ -215,7 +225,7 @@
   }
 
   function onActivity(){ lastActive = Date.now(); }
-  ['touchstart','pointerdown','mousemove','keydown','scroll'].forEach(function(ev){
+  ['touchstart','pointerdown','mousemove','keydown','scroll','click'].forEach(function(ev){
     window.addEventListener(ev, onActivity, {passive:true});
   });
   document.getElementById('b26').addEventListener('input', function(){ onActivity(); recalc(); });

@@ -1,7 +1,7 @@
 {
   "name": "Conversion & Prix",
   "short_name": "ConvPrix",
-  "start_url": "./?v=v9",
+  "start_url": "./?v=v10",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
